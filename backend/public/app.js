@@ -135,7 +135,7 @@ async function loadIntegrations() {
     integrationsTbody.innerHTML = integrations.map(integration => `
       <tr>
         <td>
-          <span class="integration-name" onclick="viewLinks(${integration.id}, '${escapeHtml(integration.name)}')">
+          <span class="integration-name" onclick="viewLinks(${integration.id}, '${escapeJs(integration.name)}')">
             ${escapeHtml(integration.name)}
           </span>
         </td>
@@ -143,7 +143,7 @@ async function loadIntegrations() {
         <td class="links-count">${integration.links_count}</td>
         <td class="date">${formatDate(integration.created_at)}</td>
         <td>
-          <button class="btn btn-danger" onclick="deleteIntegration(${integration.id}, '${escapeHtml(integration.name)}')">
+          <button class="btn btn-danger" onclick="deleteIntegration(${integration.id}, '${escapeJs(integration.name)}')">
             Удалить
           </button>
         </td>
@@ -179,10 +179,10 @@ async function viewLinks(integrationId, integrationName) {
         <td class="url-cell" title="${escapeHtml(link.url)}">${escapeHtml(link.url)}</td>
         <td>${link.sort_order}</td>
         <td>
-          <button class="btn btn-edit" onclick="editLink(${link.id}, '${escapeHtml(link.label)}', '${escapeHtml(link.url)}', ${link.sort_order})">
+          <button class="btn btn-edit" onclick="editLink(${link.id}, '${escapeJs(link.label)}', '${escapeJs(link.url)}', ${link.sort_order})">
             Изменить
           </button>
-          <button class="btn btn-danger" onclick="deleteLink(${link.id}, '${escapeHtml(link.label)}')">
+          <button class="btn btn-danger" onclick="deleteLink(${link.id}, '${escapeJs(link.label)}')">
             Удалить
           </button>
         </td>
@@ -333,6 +333,14 @@ function escapeHtml(text) {
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
+}
+
+function escapeJs(text) {
+  return text.replace(/\\/g, '\\\\')
+             .replace(/'/g, "\\'")
+             .replace(/"/g, '\\"')
+             .replace(/\n/g, '\\n')
+             .replace(/\r/g, '\\r');
 }
 
 // Make functions global for onclick handlers
