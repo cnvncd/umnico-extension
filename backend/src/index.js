@@ -117,20 +117,8 @@ app.post('/api/admin/logout', (req, res) => {
   res.json({ success: true });
 });
 
-// Serve static files for admin panel (protected)
-app.use('/admin', (req, res, next) => {
-  // Allow login page
-  if (req.path === '/login' || req.path === '/login.html') {
-    return next();
-  }
-  
-  // Check authentication
-  if (!req.session || !req.session.authenticated) {
-    return res.redirect('/admin/login');
-  }
-  
-  next();
-}, express.static(join(__dirname, '../public')));
+// Serve static files for admin panel
+app.use('/admin', express.static(join(__dirname, '../public')));
 
 // Validation error handler
 const handleValidationErrors = (req, res, next) => {

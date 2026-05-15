@@ -5,6 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Umnico Extension - Admin Panel</title>
   <link rel="stylesheet" href="style.css">
+  <script>
+    // Check authentication before loading page
+    const sessionId = localStorage.getItem('sessionId');
+    if (!sessionId) {
+      window.location.href = '/admin/login';
+    }
+  </script>
 </head>
 <body>
   <div id="app">
