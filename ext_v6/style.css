@@ -1,0 +1,253 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: #f5f6fa;
+  color: #1a1d2e;
+  width: 380px;
+}
+
+#popup-container {
+  width: 380px;
+  min-height: 300px;
+}
+
+/* ── Tabs ── */
+.tabs {
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border-bottom: 1px solid #e4e6f0;
+  padding: 0 16px;
+}
+
+.tab-button {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 13px 4px 11px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: #4a5568;
+  transition: color 0.15s, border-color 0.15s;
+  margin-bottom: -1px;
+  margin-right: 20px;
+  white-space: nowrap;
+}
+
+.tab-button:hover { color: #2d3748; }
+
+.tab-button.active {
+  color: #1a202c;
+  border-bottom-color: #4f63d2;
+}
+
+/* Badge */
+.tab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  background: #eef0f8;
+  color: #9097b8;
+  font-size: 10px;
+  font-weight: 600;
+  border-radius: 9px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.tab-button.active .tab-badge {
+  background: #dde3f8;
+  color: #4f63d2;
+}
+
+.tab-badge.has-deposit {
+  background: #d0f5e4;
+  color: #1a7a45;
+}
+
+.tab-button.active .tab-badge.has-deposit {
+  background: #b8efd4;
+  color: #157a40;
+}
+
+/* ── Tab content ── */
+.tab-contents {
+  padding: 14px;
+  max-height: 400px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #d8daea transparent;
+}
+
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+.loading, .empty {
+  font-size: 12px;
+  color: #5a5f7a;
+  padding: 24px 0;
+  text-align: center;
+}
+
+/* ── Link buttons ── */
+.quick-link-btn {
+  display: block;
+  width: 100%;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  background: #eef1fc;
+  color: #2d3748;
+  border: 1px solid #c8d0f0;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  word-break: break-all;
+  text-align: left;
+  line-height: 1.6;
+  transition: background 0.15s, border-color 0.15s;
+  position: relative;
+}
+
+.quick-link-btn:hover {
+  background: #e4e9fa;
+  border-color: #a0aee8;
+}
+
+.quick-link-btn.copied {
+  background: #eafaf2;
+  border-color: #a3e6c0;
+  color: #1a7a45;
+  text-align: center;
+  font-size: 12px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+}
+
+.link-label {
+  font-size: 9px;
+  color: #4a5568;
+  margin-top: 4px;
+  font-family: 'Inter', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+
+
+/* ── Postbacks ── */
+.postbacks-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.postback-item {
+  padding: 9px 12px;
+  border-radius: 7px;
+  background: #ffffff;
+  border: 1px solid #e4e6f0;
+  transition: border-color 0.15s;
+}
+
+.postback-item:hover { border-color: #c8d0f0; }
+
+.postback-item.deposit {
+  background: #f0faf5;
+  border-color: #a3e6c0;
+}
+
+.postback-item.deposit:hover { border-color: #6dd4a0; }
+
+.postback-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+/* Статусы постбэков */
+.postback-status {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: #eef0f8;
+  color: #8088b0;
+}
+
+.status-lead {
+  background: #e0e8fc;
+  color: #3a50c8;
+}
+
+.status-sale {
+  background: #e6f8ee;
+  color: #1a7a45;
+}
+
+.status-resale {
+  background: #fff3e0;
+  color: #b06010;
+}
+
+.postback-date {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: #4a5568;
+}
+
+.postback-info {
+  font-size: 11px;
+  color: #2d3748;
+  word-break: break-all;
+  line-height: 1.5;
+}
+
+.postback-item.deposit .postback-info {
+  color: #1a7a45;
+  font-weight: 500;
+}
+
+.postback-item.deposit .postback-date { color: #5aaa80; }
+
+/* ── Toast ── */
+.copy-notification {
+  position: fixed;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #eafaf2;
+  color: #1a7a45;
+  border: 1px solid #a3e6c0;
+  padding: 6px 16px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  animation: fadeOut 2s forwards;
+  white-space: nowrap;
+}
+
+@keyframes fadeOut {
+  0%, 70% { opacity: 1; }
+  100%     { opacity: 0; }
+}

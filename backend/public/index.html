@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Umnico Extension - Admin Panel</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Navigation -->
+    <nav class="navbar">
+      <div class="container">
+        <h1 class="logo">Umnico Extension Admin</h1>
+        <div class="breadcrumb" id="breadcrumb"></div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container">
+      <!-- Integrations List View -->
+      <div id="integrations-view" class="view active">
+        <div class="view-header">
+          <h2>Интеграции</h2>
+          <button class="btn btn-primary" id="add-integration-btn">+ Добавить интеграцию</button>
+        </div>
+        <div class="table-container">
+          <table id="integrations-table">
+            <thead>
+              <tr>
+                <th>Название</th>
+                <th>SA ID</th>
+                <th>Ссылок</th>
+                <th>Дата создания</th>
+                <th>Действия</th>
+              </tr>
+            </thead>
+            <tbody id="integrations-tbody">
+              <tr>
+                <td colspan="5" class="loading">Загрузка...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Links View -->
+      <div id="links-view" class="view">
+        <div class="view-header">
+          <button class="btn btn-secondary" id="back-to-integrations">← Назад</button>
+          <h2 id="links-view-title">Ссылки интеграции</h2>
+          <button class="btn btn-primary" id="add-link-btn">+ Добавить ссылку</button>
+        </div>
+        <div class="table-container">
+          <table id="links-table">
+            <thead>
+              <tr>
+                <th>Название</th>
+                <th>URL</th>
+                <th>Порядок</th>
+                <th>Действия</th>
+              </tr>
+            </thead>
+            <tbody id="links-tbody">
+              <tr>
+                <td colspan="4" class="loading">Загрузка...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal for Add/Edit Integration -->
+  <div id="integration-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="integration-modal-title">Добавить интеграцию</h3>
+        <button class="modal-close" id="close-integration-modal">&times;</button>
+      </div>
+      <form id="integration-form">
+        <div class="form-group">
+          <label for="integration-name">Название</label>
+          <input type="text" id="integration-name" required placeholder="Например: Pinco RU Telegram">
+        </div>
+        <div class="form-group">
+          <label for="integration-sa-id">SA ID</label>
+          <input type="text" id="integration-sa-id" required placeholder="Например: 108954">
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" id="cancel-integration">Отмена</button>
+          <button type="submit" class="btn btn-primary">Сохранить</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal for Add/Edit Link -->
+  <div id="link-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="link-modal-title">Добавить ссылку</h3>
+        <button class="modal-close" id="close-link-modal">&times;</button>
+      </div>
+      <form id="link-form">
+        <div class="form-group">
+          <label for="link-label">Название для обработчика</label>
+          <input type="text" id="link-label" required placeholder="Например: Основная">
+        </div>
+        <div class="form-group">
+          <label for="link-url">URL (без ?c=)</label>
+          <input type="url" id="link-url" required placeholder="https://example.com/offer">
+        </div>
+        <div class="form-group">
+          <label for="link-sort-order">Порядок сортировки</label>
+          <input type="number" id="link-sort-order" value="0" min="0">
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" id="cancel-link">Отмена</button>
+          <button type="submit" class="btn btn-primary">Сохранить</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

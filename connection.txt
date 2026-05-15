@@ -1,0 +1,3 @@
+Сервер: root@5.42.124.161
+  Ключ: C:\Users\bauyr\.ssh\ai_agent_key
+  Подключайся через: ssh -i C:\Users\bauyr\.ssh\ai_agent_key root@5.42.124.161

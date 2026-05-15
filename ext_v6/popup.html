@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Umnico</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="popup-container">
+    <div class="tabs">
+      <button class="tab-button active" data-tab="main-links">Ссылки</button>
+      <button class="tab-button" data-tab="postbacks">
+        Постбэки <span class="tab-badge" id="postbacks-count">—</span>
+      </button>
+    </div>
+    <div class="tab-contents">
+      <div class="tab-content active" id="main-links"><p class="loading">Загрузка...</p></div>
+      <div class="tab-content" id="postbacks"><p class="loading">Загрузка...</p></div>
+    </div>
+  </div>
+  <script src="popup.js" type="module"></script>
+</body>
+</html>
