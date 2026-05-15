@@ -1,6 +1,12 @@
 // API Base URL
 const API_BASE = window.location.origin;
 
+// Check authentication
+const sessionId = localStorage.getItem('sessionId');
+if (!sessionId) {
+  window.location.href = '/admin/login';
+}
+
 // State
 let currentIntegrationId = null;
 let currentIntegrationName = '';
@@ -27,6 +33,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Event Listeners
 function setupEventListeners() {
+  // Logout
+  document.getElementById('logout-btn').addEventListener('click', async () => {
+    const sessionId = localStorage.getItem('sessionId');
+    if (sessionId) {
+      await fetch('/api/admin/logout', {
+        method: 'POST',
+        headers: {
+          'X-Session-Id': sessionId
+        }
+      });
+    }
+    localStorage.removeItem('sessionId');
+    window.location.href = '/admin/login';
+  });
+
   // Add Integration
   document.getElementById('add-integration-btn').addEventListener('click', () => {
     editingIntegrationId = null;
@@ -71,13 +92,22 @@ function setupEventListeners() {
 // API Calls
 async function apiCall(endpoint, options = {}) {
   try {
+    const sessionId = localStorage.getItem('sessionId');
     const response = await fetch(`${API_BASE}${endpoint}`, {
       headers: {
         'Content-Type': 'application/json',
+        'X-Session-Id': sessionId,
         ...options.headers
       },
       ...options
     });
+
+    if (response.status === 401) {
+      // Unauthorized - redirect to login
+      localStorage.removeItem('sessionId');
+      window.location.href = '/admin/login';
+      return;
+    }
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({ error: 'Request failed' }));

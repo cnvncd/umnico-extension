@@ -5,12 +5,20 @@ import { body, param, query, validationResult } from 'express-validator';
 import pool from './db.js';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import crypto from 'crypto';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Admin password
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin2026';
+const SESSION_SECRET = process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex');
+
+// Simple session storage (in production use Redis or database)
+const sessions = new Map();
 
 // CORS configuration
 const allowedOrigins = process.env.ALLOWED_ORIGINS 
@@ -40,8 +48,78 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static files for admin panel
-app.use('/admin', express.static(join(__dirname, '../public')));
+// Session middleware
+const sessionMiddleware = (req, res, next) => {
+  const sessionId = req.headers['x-session-id'] || req.query.session;
+  if (sessionId && sessions.has(sessionId)) {
+    const session = sessions.get(sessionId);
+    if (session.expires > Date.now()) {
+      req.session = session;
+      return next();
+    } else {
+      sessions.delete(sessionId);
+    }
+  }
+  req.session = null;
+  next();
+};
+
+app.use(sessionMiddleware);
+
+// Admin authentication middleware
+const requireAuth = (req, res, next) => {
+  if (!req.session || !req.session.authenticated) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  next();
+};
+
+// Serve login page
+app.get('/admin/login', (req, res) => {
+  res.sendFile(join(__dirname, '../public/login.html'));
+});
+
+// Login endpoint
+app.post('/api/admin/login', (req, res) => {
+  const { password } = req.body;
+  
+  if (password === ADMIN_PASSWORD) {
+    const sessionId = crypto.randomBytes(32).toString('hex');
+    const session = {
+      authenticated: true,
+      expires: Date.now() + 24 * 60 * 60 * 1000 // 24 hours
+    };
+    sessions.set(sessionId, session);
+    
+    res.json({ success: true, sessionId });
+  } else {
+    res.status(401).json({ error: 'Invalid password' });
+  }
+});
+
+// Logout endpoint
+app.post('/api/admin/logout', (req, res) => {
+  const sessionId = req.headers['x-session-id'];
+  if (sessionId) {
+    sessions.delete(sessionId);
+  }
+  res.json({ success: true });
+});
+
+// Serve static files for admin panel (protected)
+app.use('/admin', (req, res, next) => {
+  // Allow login page
+  if (req.path === '/login' || req.path === '/login.html') {
+    return next();
+  }
+  
+  // Check authentication
+  if (!req.session || !req.session.authenticated) {
+    return res.redirect('/admin/login');
+  }
+  
+  next();
+}, express.static(join(__dirname, '../public')));
 
 // Validation error handler
 const handleValidationErrors = (req, res, next) => {
@@ -239,7 +317,7 @@ app.post('/api/leads',
 // ============================================
 
 // GET /api/admin/integrations - List all integrations with link count
-app.get('/api/admin/integrations', async (req, res) => {
+app.get('/api/admin/integrations', requireAuth, async (req, res) => {
   try {
     const result = await pool.query(
       `SELECT i.id, i.sa_id, i.name, i.created_at,
@@ -259,6 +337,7 @@ app.get('/api/admin/integrations', async (req, res) => {
 
 // POST /api/admin/integrations - Create integration
 app.post('/api/admin/integrations',
+  requireAuth,
   body('name').notEmpty().trim(),
   body('sa_id').notEmpty().trim(),
   handleValidationErrors,
@@ -284,6 +363,7 @@ app.post('/api/admin/integrations',
 
 // DELETE /api/admin/integrations/:id - Delete integration
 app.delete('/api/admin/integrations/:id',
+  requireAuth,
   param('id').isInt(),
   handleValidationErrors,
   async (req, res) => {
@@ -309,6 +389,7 @@ app.delete('/api/admin/integrations/:id',
 
 // GET /api/admin/integrations/:id/links - Get links for integration
 app.get('/api/admin/integrations/:id/links',
+  requireAuth,
   param('id').isInt(),
   handleValidationErrors,
   async (req, res) => {
@@ -330,6 +411,7 @@ app.get('/api/admin/integrations/:id/links',
 
 // POST /api/admin/integrations/:id/links - Add link to integration
 app.post('/api/admin/integrations/:id/links',
+  requireAuth,
   param('id').isInt(),
   body('label').notEmpty().trim(),
   body('url').notEmpty().trim().isURL({ require_protocol: true }),
@@ -365,6 +447,7 @@ app.post('/api/admin/integrations/:id/links',
 
 // PUT /api/admin/links/:id - Update link
 app.put('/api/admin/links/:id',
+  requireAuth,
   param('id').isInt(),
   body('label').optional().trim(),
   body('url').optional().trim().isURL({ require_protocol: true }),
@@ -416,6 +499,7 @@ app.put('/api/admin/links/:id',
 
 // DELETE /api/admin/links/:id - Delete link
 app.delete('/api/admin/links/:id',
+  requireAuth,
   param('id').isInt(),
   handleValidationErrors,
   async (req, res) => {

@@ -31,6 +31,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
 }
 
 .logo {
@@ -42,6 +43,7 @@ body {
 .breadcrumb {
   font-size: 14px;
   color: #718096;
+  flex: 1;
 }
 
 .breadcrumb a {
