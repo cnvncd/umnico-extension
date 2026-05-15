@@ -176,18 +176,22 @@
         });
 
         const data = await response.json();
+        
+        console.log('Login response:', data);
 
         if (response.ok && data.success) {
           // Save session ID
           localStorage.setItem('sessionId', data.sessionId);
+          console.log('Session saved, redirecting...');
           // Redirect to admin panel
-          window.location.href = '/admin';
+          window.location.href = '/admin/';
         } else {
           showError(data.error || 'Неверный пароль');
           loginBtn.disabled = false;
           loginBtn.textContent = 'Войти';
         }
       } catch (error) {
+        console.error('Login error:', error);
         showError('Ошибка подключения к серверу');
         loginBtn.disabled = false;
         loginBtn.textContent = 'Войти';

@@ -80,8 +80,17 @@ app.get('/admin/login', (req, res) => {
 });
 
 // Login endpoint
-app.post('/api/admin/login', (req, res) => {
+app.post('/api/admin/login', async (req, res) => {
+  console.log('Login request received:', req.body);
+  
   const { password } = req.body;
+  
+  if (!password) {
+    console.log('No password provided');
+    return res.status(400).json({ error: 'Password is required' });
+  }
+  
+  console.log('Comparing passwords:', { provided: password, expected: ADMIN_PASSWORD });
   
   if (password === ADMIN_PASSWORD) {
     const sessionId = crypto.randomBytes(32).toString('hex');
@@ -91,8 +100,10 @@ app.post('/api/admin/login', (req, res) => {
     };
     sessions.set(sessionId, session);
     
+    console.log('Login successful, sessionId:', sessionId);
     res.json({ success: true, sessionId });
   } else {
+    console.log('Invalid password');
     res.status(401).json({ error: 'Invalid password' });
   }
 });
