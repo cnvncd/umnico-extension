@@ -227,59 +227,82 @@ app.get('/api/browser-extension/:leadId',
   }
 );
 
-// GET /api/postback - Receive postbacks from Keitaro
-app.get('/api/postback',
-  async (req, res) => {
-    const timestamp = new Date().toISOString();
-    console.log(`[${timestamp}] Postback received - Full query:`, req.query);
+// Helper function to handle postback logic
+async function handlePostback(req, res, status) {
+  const timestamp = new Date().toISOString();
+  console.log(`[${timestamp}] Postback ${status} received - Full query:`, req.query);
+  
+  const { external_id, sub_id_30, offer, sub_id, payout } = req.query;
+  
+  // Try to get leadId from external_id or sub_id_30
+  const leadId = external_id || sub_id_30;
+  
+  // Validate required fields
+  if (!leadId || leadId.trim() === '') {
+    console.log(`[${timestamp}] ERROR: leadId is empty or missing (checked external_id and sub_id_30)`);
+    return res.status(400).json({ error: 'external_id or sub_id_30 is required and cannot be empty' });
+  }
+  
+  console.log(`[${timestamp}] Postback validated:`, { leadId, status, offer, sub_id, payout });
+  
+  try {
+    // Find lead by umnico_id
+    const leadResult = await pool.query(
+      'SELECT id FROM leads WHERE umnico_id = $1',
+      [leadId]
+    );
     
-    const { external_id, sub_id_30, status, offer, sub_id, payout } = req.query;
-    
-    // Try to get leadId from external_id or sub_id_30
-    const leadId = external_id || sub_id_30;
-    
-    // Validate required fields
-    if (!leadId || leadId.trim() === '') {
-      console.log(`[${timestamp}] ERROR: leadId is empty or missing (checked external_id and sub_id_30)`);
-      return res.status(400).json({ error: 'external_id or sub_id_30 is required and cannot be empty' });
+    if (leadResult.rows.length === 0) {
+      console.log(`[${timestamp}] Lead not found: ${leadId}`);
+      return res.status(404).json({ error: 'Lead not found' });
     }
     
+    const dbLeadId = leadResult.rows[0].id;
+    
+    // Insert postback
+    await pool.query(
+      'INSERT INTO postbacks (lead_id, status, offer, sub_id, payout) VALUES ($1, $2, $3, $4, $5)',
+      [dbLeadId, status, offer || null, sub_id || null, payout ? parseFloat(payout) : null]
+    );
+    
+    console.log(`[${timestamp}] Postback saved for lead ${leadId}`);
+    res.status(200).json({ success: true });
+    
+  } catch (error) {
+    console.error(`[${timestamp}] Error saving postback:`, error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
+// GET /api/postback - Receive postbacks from Keitaro (legacy with status parameter)
+app.get('/api/postback',
+  async (req, res) => {
+    const { status } = req.query;
+    
     if (!status || status.trim() === '') {
+      const timestamp = new Date().toISOString();
       console.log(`[${timestamp}] ERROR: status is empty or missing`);
       return res.status(400).json({ error: 'status is required and cannot be empty' });
     }
     
-    console.log(`[${timestamp}] Postback validated:`, { leadId, status, offer, sub_id, payout });
-    
-    try {
-      // Find lead by umnico_id
-      const leadResult = await pool.query(
-        'SELECT id FROM leads WHERE umnico_id = $1',
-        [leadId]
-      );
-      
-      if (leadResult.rows.length === 0) {
-        console.log(`[${timestamp}] Lead not found: ${leadId}`);
-        return res.status(404).json({ error: 'Lead not found' });
-      }
-      
-      const dbLeadId = leadResult.rows[0].id;
-      
-      // Insert postback
-      await pool.query(
-        'INSERT INTO postbacks (lead_id, status, offer, sub_id, payout) VALUES ($1, $2, $3, $4, $5)',
-        [dbLeadId, status, offer || null, sub_id || null, payout ? parseFloat(payout) : null]
-      );
-      
-      console.log(`[${timestamp}] Postback saved for lead ${leadId}`);
-      res.status(200).json({ success: true });
-      
-    } catch (error) {
-      console.error(`[${timestamp}] Error saving postback:`, error);
-      res.status(500).json({ error: 'Internal server error' });
-    }
+    await handlePostback(req, res, status);
   }
 );
+
+// GET /api/postback/lead - Registration postback
+app.get('/api/postback/lead', async (req, res) => {
+  await handlePostback(req, res, 'lead');
+});
+
+// GET /api/postback/sale - First deposit postback
+app.get('/api/postback/sale', async (req, res) => {
+  await handlePostback(req, res, 'sale');
+});
+
+// GET /api/postback/resale - Repeat deposit postback
+app.get('/api/postback/resale', async (req, res) => {
+  await handlePostback(req, res, 'resale');
+});
 
 // POST /api/leads - Create or update lead
 app.post('/api/leads',
